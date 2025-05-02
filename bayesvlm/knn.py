@@ -1,4 +1,7 @@
 import torch
+import numpy as np
+from sklearn.neighbors import NearestNeighbors
+from scipy.sparse.csgraph import connected_components
 from tqdm import tqdm
 from collections import OrderedDict
 from bayesvlm.vlm import EncoderResult
@@ -217,4 +220,56 @@ def find_similar_samples_wasserstein(
             similarities=keep_val,
         )
 
+    return text_idx_to_train_data
+
+def find_similar_samples_snn(
+    train: EncoderResult,
+    test: EncoderResult,
+    indices_test: torch.Tensor,
+    values_test: torch.Tensor,
+    k_neighbors: int,
+    min_shared: int,
+    source_covariance,
+    device: str,
+):
+    """
+    Use Shared Nearest-Neighbor clustering on train embeds to pick support candidates,
+    then apply BALD on that pool.
+    """
+    X = train.embeds.cpu().numpy()  # shape (N_train, D)
+    
+    nbrs = NearestNeighbors(n_neighbors=k_neighbors,metric='cosine').fit(X)
+    knn_idx = nbrs.kneighbors_graph(X, mode='connectivity').tolil()
+    
+    N = X.shape[0]
+    snn_graph = np.zeros((N, N), dtype=bool)
+    for i in range(N):
+        neigh_i = set(knn_idx.rows[i])
+        for j in knn_idx.rows[i]:
+            shared = len(neigh_i.intersection(knn_idx.rows[j]))
+            if shared >= min_shared:
+                snn_graph[i, j] = True
+                snn_graph[j, i] = True
+    
+    n_components, labels = connected_components(snn_graph, directed=False)
+    
+    support_idxs = []
+    X_tensor = train.embeds.to(device)
+    for c in range(n_components):
+        members = np.where(labels == c)[0]
+        if len(members) == 0:
+            continue
+        cluster_feats = X_tensor[members]  # (M_c, D)
+        centroid = cluster_feats.mean(dim=0, keepdim=True)  # (1, D)
+        dists = torch.norm(cluster_feats - centroid.to(device), dim=1)
+        best = members[int(dists.argmin())]
+        support_idxs.append(int(best))
+    
+    text_idx_to_train_data = OrderedDict()
+    for ti, t_idx in enumerate(indices_test.tolist()):
+        text_idx_to_train_data[int(t_idx)] = dict(
+            score=float(values_test[ti]),
+            indices=support_idxs,
+            similarities=[None]*len(support_idxs),
+        )
     return text_idx_to_train_data

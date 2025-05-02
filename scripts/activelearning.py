@@ -24,6 +24,7 @@ from bayesvlm.knn import (
     extract_test_train_indices,
     find_similar_samples_cosine,
     find_similar_samples_wasserstein,
+    find_similar_samples_snn
 )
 from bayesvlm.selection import select_random, select_topk
 from bayesvlm.hessians import compute_covariances, load_hessians, optimize_prior_precision
@@ -663,45 +664,65 @@ if __name__ == '__main__':
     torch.multiprocessing.set_sharing_strategy('file_system')
 
     parser = argparse.ArgumentParser()
+    # Model & data
     parser.add_argument('--model', type=str, default='clip-base')
     parser.add_argument('--dataset', type=str, default='homeoffice-da-clipart')
-    parser.add_argument('--hessian_dir', type=str, default='hessians/hessian_CLIP-ViT-B-32-laion2B-s34B-b79K')
-
-    parser.add_argument('--experiment_dir', type=str, default='experiments/active-finetuning')
+    parser.add_argument('--hessian_dir', type=str,
+                        default='hessians/hessian_CLIP-ViT-B-32-laion2B-s34B-b79K')
+    parser.add_argument('--experiment_dir', type=str,
+                        default='experiments/active-finetuning')
     parser.add_argument('--project_name', type=str, default='active-finetuning')
-    
-    # experiment parameters
-    parser.add_argument('--subset_size', type=int, default=50)
+
+    # Support‐set selection
+    parser.add_argument('--selection_method',
+                        choices=['knn', 'snn'],
+                        default='knn',
+                        help='Which support‐set selection to use')
+    # KNN params
+    parser.add_argument('--k_nearest', type=int, default=1,
+                        help='Number of neighbors for KNN selection')
+    parser.add_argument('--knn_method', choices=['cosine', 'wasserstein'],
+                        default='wasserstein',
+                        help='Distance metric for KNN')
+  
+    # SNN params
+    parser.add_argument('--snn_k_neighbors', type=int, default=10,
+                        help='k for initial neighbor lists in SNN')
+    parser.add_argument('--snn_min_shared', type=int, default=5,
+                        help='Min shared neighbors threshold in SNN')
+
+    # Experiment parameters
+    parser.add_argument('--subset_size', type=int, default=10)
     parser.add_argument('--hessian_scale', type=float, default=10)
 
-    # precompute parameters
+    # Precompute
     parser.add_argument('--predictions_batch_size', type=int, default=256)
     parser.add_argument('--precompute_batch_size', type=int, default=256)
     parser.add_argument('--precompute_num_workers', type=int, default=8)
 
-    # fine-tuning parameters
+    # Fine-tuning
     parser.add_argument('--finetune_lr', type=float, default=1e-5)
     parser.add_argument('--finetune_wd', type=float, default=5e-2)
-    parser.add_argument('--finetune_epochs', type=int, default=100)
+    parser.add_argument('--finetune_epochs', type=int, default=10)
     parser.add_argument('--finetune_batch_size', type=int, default=30)
 
-    # which selection strategies to run
-    parser.add_argument('--only_deterministic_strategies', action='store_true', default=False)
-    parser.add_argument('--only_random_strategies', action='store_true', default=False)
+    # Strategy toggles
+    parser.add_argument('--only_deterministic_strategies',
+                        action='store_true', default=False)
+    parser.add_argument('--only_random_strategies',
+                        action='store_true', default=False)
     parser.add_argument('--without_epig', action='store_true', default=False)
     parser.add_argument('--only_epig', action='store_true', default=False)
 
-    # epig parameters
+    # EPIG parameters
     parser.add_argument('--epig_lr', type=float, default=1e-4)
     parser.add_argument('--epig_hessian_update_scale', type=float, default=10.0)
 
-    # knn parameters
-    parser.add_argument('--k_nearest', type=int, default=1)
-    parser.add_argument('--knn_method', type=str, default='wasserstein')
-
+    # Device
     parser.add_argument('--device', type=str, default='cuda')
-    args = parser.parse_args()
 
+    args = parser.parse_args()
+    
     main(
         model_str=args.model,
         dataset=args.dataset,
