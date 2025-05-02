@@ -24,7 +24,10 @@ from bayesvlm.knn import (
     extract_test_train_indices,
     find_similar_samples_cosine,
     find_similar_samples_wasserstein,
+<<<<<<< HEAD
     find_similar_samples_snn
+=======
+>>>>>>> 855be8b601bf5e3e3136c0a01a585bdfe5d9ad4c
 )
 from bayesvlm.selection import select_random, select_topk
 from bayesvlm.hessians import compute_covariances, load_hessians, optimize_prior_precision
@@ -664,6 +667,7 @@ if __name__ == '__main__':
     torch.multiprocessing.set_sharing_strategy('file_system')
 
     parser = argparse.ArgumentParser()
+<<<<<<< HEAD
     # Model & data
     parser.add_argument('--model', type=str, default='clip-base')
     parser.add_argument('--dataset', type=str, default='homeoffice-da-clipart')
@@ -696,10 +700,25 @@ if __name__ == '__main__':
     parser.add_argument('--hessian_scale', type=float, default=10)
 
     # Precompute
+=======
+    parser.add_argument('--model', type=str, default='clip-base')
+    parser.add_argument('--dataset', type=str, default='homeoffice-da-clipart')
+    parser.add_argument('--hessian_dir', type=str, default='hessians/hessian_CLIP-ViT-B-32-laion2B-s34B-b79K')
+
+    parser.add_argument('--experiment_dir', type=str, default='experiments/active-finetuning')
+    parser.add_argument('--project_name', type=str, default='active-finetuning')
+    
+    # experiment parameters
+    parser.add_argument('--subset_size', type=int, default=50)
+    parser.add_argument('--hessian_scale', type=float, default=10)
+
+    # precompute parameters
+>>>>>>> 855be8b601bf5e3e3136c0a01a585bdfe5d9ad4c
     parser.add_argument('--predictions_batch_size', type=int, default=256)
     parser.add_argument('--precompute_batch_size', type=int, default=256)
     parser.add_argument('--precompute_num_workers', type=int, default=8)
 
+<<<<<<< HEAD
     # Fine-tuning
     parser.add_argument('--finetune_lr', type=float, default=1e-5)
     parser.add_argument('--finetune_wd', type=float, default=5e-2)
@@ -723,6 +742,31 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     
+=======
+    # fine-tuning parameters
+    parser.add_argument('--finetune_lr', type=float, default=1e-5)
+    parser.add_argument('--finetune_wd', type=float, default=5e-2)
+    parser.add_argument('--finetune_epochs', type=int, default=100)
+    parser.add_argument('--finetune_batch_size', type=int, default=30)
+
+    # which selection strategies to run
+    parser.add_argument('--only_deterministic_strategies', action='store_true', default=False)
+    parser.add_argument('--only_random_strategies', action='store_true', default=False)
+    parser.add_argument('--without_epig', action='store_true', default=False)
+    parser.add_argument('--only_epig', action='store_true', default=False)
+
+    # epig parameters
+    parser.add_argument('--epig_lr', type=float, default=1e-4)
+    parser.add_argument('--epig_hessian_update_scale', type=float, default=10.0)
+
+    # knn parameters
+    parser.add_argument('--k_nearest', type=int, default=1)
+    parser.add_argument('--knn_method', type=str, default='wasserstein')
+
+    parser.add_argument('--device', type=str, default='cuda')
+    args = parser.parse_args()
+
+>>>>>>> 855be8b601bf5e3e3136c0a01a585bdfe5d9ad4c
     main(
         model_str=args.model,
         dataset=args.dataset,

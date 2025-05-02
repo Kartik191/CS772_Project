@@ -1,7 +1,10 @@
 import torch
+<<<<<<< HEAD
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 from scipy.sparse.csgraph import connected_components
+=======
+>>>>>>> 855be8b601bf5e3e3136c0a01a585bdfe5d9ad4c
 from tqdm import tqdm
 from collections import OrderedDict
 from bayesvlm.vlm import EncoderResult
@@ -221,6 +224,7 @@ def find_similar_samples_wasserstein(
         )
 
     return text_idx_to_train_data
+<<<<<<< HEAD
 
 def find_similar_samples_snn(
     train: EncoderResult,
@@ -273,3 +277,5 @@ def find_similar_samples_snn(
             similarities=[None]*len(support_idxs),
         )
     return text_idx_to_train_data
+=======
+>>>>>>> 855be8b601bf5e3e3136c0a01a585bdfe5d9ad4c

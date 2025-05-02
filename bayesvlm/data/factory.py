@@ -13,7 +13,11 @@ from .eurosat import EuroSATDataModule
 from .cifar100 import CIFAR100DataModule
 from .stanfordcars import StanfordCarsDataModule
 from .dtd import DTDDataModule
+<<<<<<< HEAD
 # from .sun397 import Sun397DataModule
+=======
+from .sun397 import Sun397DataModule
+>>>>>>> 855be8b601bf5e3e3136c0a01a585bdfe5d9ad4c
 from .oxfordpets import OxfordpetsDataModule
 from .ucf101 import UCF101DataModule
 from .cub import CUBDataModule
@@ -31,7 +35,11 @@ from .homeoffice_da import (
     HomeOfficeDARealWorldDataModule,
 )
 
+<<<<<<< HEAD
 # from imagenet_wds import ImagenetWDSModule
+=======
+from imagenet_wds import ImagenetWDSModule
+>>>>>>> 855be8b601bf5e3e3136c0a01a585bdfe5d9ad4c
 from .imagenet_1k import (
     Imagenet50DataModule,
     Imagenet100DataModule,
@@ -59,7 +67,11 @@ SUPPORTED_MODULES = {
     'cifar100': CIFAR100DataModule,
     'stanfordcars': StanfordCarsDataModule,
     'dtd': DTDDataModule,
+<<<<<<< HEAD
     # 'sun397': Sun397DataModule,
+=======
+    'sun397': Sun397DataModule,
+>>>>>>> 855be8b601bf5e3e3136c0a01a585bdfe5d9ad4c
     'oxfordpets': OxfordpetsDataModule,
     'ucf101': UCF101DataModule,
     'cub': CUBDataModule,
@@ -76,7 +88,11 @@ SUPPORTED_MODULES = {
     'homeoffice-da-realworld': HomeOfficeDARealWorldDataModule,
 
     # imagenet datasets
+<<<<<<< HEAD
     # 'imagenet-val-wds': ImagenetWDSModule,
+=======
+    'imagenet-val-wds': ImagenetWDSModule,
+>>>>>>> 855be8b601bf5e3e3136c0a01a585bdfe5d9ad4c
     'imagenet-100': Imagenet100DataModule,
     'imagenet-50': Imagenet50DataModule,
 
